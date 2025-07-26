@@ -133,5 +133,5 @@ def upload_docx_to_pinecone(docx_path):
 
 # Run this script
 if __name__ == "__main__":
-    docx_file_path = "C:\\Users\\hasan\\Assesment\\HSC 21 fixed.docx"  # Update as needed
+    docx_file_path = "C:\\Users\\hasan\\Assesment\\extracted_text_bangla.docx"  # Update as needed
     upload_docx_to_pinecone(docx_file_path)

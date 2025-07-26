@@ -24,6 +24,11 @@ index = pc.Index("bangla-docx-embeddings")
 # Configure Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+
+# Initialize conversation history with a maximum length of 5
+conversation_history = []
+MAX_HISTORY_LENGTH = 5
+
 def embed_query(query):
     """Create embedding for the search query"""
     try:
@@ -129,7 +134,13 @@ def answer_question_with_context(query, context_groups):
 
     full_context = "\n\n".join(all_contexts)
 
+    conversation_prompt = "\n".join([f"Q: {item['question']}\nA: {item['answer']}" for item in conversation_history])
+
     prompt = f"""You are an expert assistant helping to answer questions based on understanding document content and what it implies. Only give the answer don't provide any sources or extra context. 
+
+    
+    CONVERSATION HISTORY:
+    {conversation_prompt}
 
     CONTEXTS FROM DOCUMENT:
     {full_context}
@@ -167,6 +178,12 @@ def get_answer(query):
 
     context_groups = group_chunks_by_context(relevant_chunks, max_context_length=5000)
     answer, sources = answer_question_with_context(query, context_groups)
+
+
+    # Append to conversation history
+    conversation_history.append({"question": query, "answer": answer})
+    if len(conversation_history) > MAX_HISTORY_LENGTH:
+        conversation_history.pop(0)
 
     return answer, sources
 
