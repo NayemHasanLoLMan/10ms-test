@@ -85,18 +85,18 @@ def embed_with_gemini(text, retries=5, delay=15):
             )
             return response['embedding']
         except Exception as e:
-            print(f"⚠️ Retry {attempt + 1}/{retries} - Error creating embedding: {e}")
+            print(f"Retry {attempt + 1}/{retries} - Error creating embedding: {e}")
             time.sleep(delay)
     return None
 
 def upload_docx_to_pinecone(docx_path):
-    print(f"📄 Processing DOCX: {docx_path}")
+    print(f"Processing DOCX: {docx_path}")
     
     raw_text = extract_text_from_docx(docx_path)
     cleaned_text = clean_bangla_text(raw_text)
     
     if not cleaned_text:
-        print("❌ No valid text found.")
+        print("No valid text found.")
         return 0
 
     # Create chunks based on character length
@@ -124,11 +124,11 @@ def upload_docx_to_pinecone(docx_path):
             index.upsert([(vector_id, embedding, metadata)])
             total_chunks_uploaded += 1
 
-            print(f"✅ Uploaded: Chunk {chunk_index + 1} ({len(chunk)} chars)")
+            print(f"Uploaded: Chunk {chunk_index + 1} ({len(chunk)} chars)")
         else:
-            print(f"❌ Failed to embed: Chunk {chunk_index + 1}")
+            print(f"Failed to embed: Chunk {chunk_index + 1}")
 
-    print(f"\n🎉 Total chunks uploaded: {total_chunks_uploaded}")
+    print(f"\nTotal chunks uploaded: {total_chunks_uploaded}")
     return total_chunks_uploaded
 
 # Run this script
