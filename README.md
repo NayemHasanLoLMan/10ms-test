@@ -1,11 +1,11 @@
 
-# 📚 Bangla RAG System using Gemini + Pinecone
+#  Bangla RAG System using Gemini + Pinecone
 
 A lightweight Bangla Q&A system using Retrieval-Augmented Generation (RAG), optimized for noisy scanned documents. Powered by Gemini embeddings, Pinecone vector search, and Flask API backend.
 
 ---
 
-## 🛠️ Setup Guide
+##  Setup Guide
 
 ### 1. Clone the Repository
 
@@ -29,7 +29,7 @@ PINECONE_API_KEY="pcsk_GrWa8_9wUDhCHxEJxY5XYeHkwHq9qTexxJgoxKsCgz9EAKHu1ZSxxNsqH
 GEMINI_API_KEY="your-gemini-api-key"
 ```
 
-> ⚠️ Replace with your actual keys.
+>  Replace with your actual keys for Gemini. The pinecone api key is given to access the database.
 
 ### 4. Run the Flask Server
 
@@ -39,7 +39,7 @@ python flusk_api.py
 
 ---
 
-## 🧰 Tools, Libraries, and Packages Used
+## Tools, Libraries, and Packages Used
 
 | Category         | Tool/Library         | Purpose                                  |
 |------------------|----------------------|------------------------------------------|
@@ -51,7 +51,7 @@ python flusk_api.py
 
 ---
 
-## 💡 Sample Queries and Outputs
+## Sample Queries and Outputs
 
 ### 🔤 Bangla Example
 
@@ -100,7 +100,7 @@ What is the age of onupom at the time of wedding?
 
 ---
 
-## 📊 Evaluation Matrix (Basic Manual QA)
+##  Evaluation Matrix (Basic Manual QA)
 
 | Metric                    | Result                         |
 |---------------------------|--------------------------------|
@@ -112,7 +112,7 @@ What is the age of onupom at the time of wedding?
 
 ---
 
-## 🧪 Technical Q&A Answers
+##  Answers to Submission Requirement Questions
 
 ### 1. What method or library did you use to extract the text, and why? Did you face any formatting challenges with the PDF content?
 
@@ -163,12 +163,12 @@ What is the age of onupom at the time of wedding?
 **Improvements:**
 - Use sentence-boundary-aware chunking
 - Attach headings or metadata to chunks
-- Having some issue with returning response in English with english query
+- Having some issue with returning a response in English with English query
 - Add fallback keyword search if embedding match is too weak
 
 
 ---
 
-## 🔗 License
+##  License
 
 MIT License © Hasan Mahmood
