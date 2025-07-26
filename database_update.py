@@ -1,116 +1,137 @@
 import os
+import re
 import time
-import google.generativeai as genai
-import fitz  # PyMuPDF for PDF extraction
 from dotenv import load_dotenv
+from docx import Document
+import google.generativeai as genai
 from pinecone import Pinecone, ServerlessSpec
 
-import math
-from textwrap import wrap
-
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Initialize Pinecone client using the new way
+# Initialize Pinecone
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-
-# Define Serverless specifications
-serverless_spec = ServerlessSpec(
-    cloud="aws",       
-    region="us-east-1"  
-)
-
-# Index name
-index_name = "hsc26-bangla-1st-paper"  # Name of the index
+index_name = "bangla-docx-embeddings"
 
 # Create index if it doesn't exist
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
-        dimension=768,  # Dimension based on Gemini embedding
-        metric="cosine",  # metric for embeddings
-        spec=serverless_spec 
+        dimension=3072,
+        metric="cosine",
+        spec=ServerlessSpec(cloud="aws", region="us-east-1")
     )
 
-# Connect to the index
 index = pc.Index(index_name)
 
-# Initialize Gemini
+# Configure Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Function to extract text from a PDF file
-def extract_pdf_text(pdf_path):
-    doc = fitz.open(pdf_path)  
-    pdf_text = []
-    
-    # Extract text page by page
-    for page_num in range(doc.page_count):
-        page = doc.load_page(page_num)  # Load each page
-        text = page.get_text()  # Extract text from page
-        
-        if text.strip():  # Check if the text is not empty or just whitespace
-            pdf_text.append(text)
+def extract_text_from_docx(docx_path):
+    doc = Document(docx_path)
+    # Join all paragraphs into one long string
+    text = " ".join([para.text.strip() for para in doc.paragraphs if para.text.strip()])
+    return text
+
+def clean_bangla_text(text):
+    text = text.replace('\\n', ' ').replace('\n', ' ')
+    text = re.sub(r'\\u0000|\u0000|\\[a-zA-Z0-9]+', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'[^\u0980-\u09FF\u0020-\u007E\s।,.:;!?()-]', '', text)
+    text = re.sub(r'[।]{2,}', '।', text)
+    text = re.sub(r'[,]{2,}', ',', text)
+    return text.strip()
+
+def create_overlapping_chunks(text, chunk_size=1500, overlap=500):
+    """
+    Create chunks of the specified size (chunk_size) with overlap.
+    """
+    chunks = []
+    start = 0
+    text_len = len(text)
+
+    while start < text_len:
+        end = start + chunk_size
+        if end > text_len:
+            end = text_len
         else:
-            pdf_text.append('')  # Append empty string for pages with no text
+            # Ensure overlap
+            end = min(end, text_len)
+
+        chunk = text[start:end].strip()
+
+        # If chunk is very small and there is a previous chunk, merge it to previous chunk
+        if len(chunk) < 300 and chunks:
+            # Append small chunk to previous chunk with a space separator
+            chunks[-1] += " " + chunk
+        else:
+            chunks.append(chunk)
+
+        if end >= text_len:
+            break
+
+        # Move start forward with overlap
+        start = end - overlap
+
+    return chunks
+
+def embed_with_gemini(text, retries=5, delay=15):
+    for attempt in range(retries):
+        try:
+            response = genai.embed_content(
+                model='gemini-embedding-001',
+                content=text,
+                task_type="retrieval_document"
+            )
+            return response['embedding']
+        except Exception as e:
+            print(f"⚠️ Retry {attempt + 1}/{retries} - Error creating embedding: {e}")
+            time.sleep(delay)
+    return None
+
+def upload_docx_to_pinecone(docx_path):
+    print(f"📄 Processing DOCX: {docx_path}")
     
-    return pdf_text, doc.metadata.get("title", "Unknown Title")  
-
-# Function to embed text using Gemini's `text-embedding-004` model
-def embed_text_with_gemini(text):
-    if text.strip():  # Ensure the text is not empty or whitespace
-        response = genai.embed_content(
-            model='text-embedding-004',
-            content=text,
-            task_type="retrieval_document"  
-        )
-        return response['embedding']
-    else:
-        print("Warning: Skipping empty page.")
-        return None  
-
-
-# Function to chunk text into max_length
-def chunk_text(text, max_length=8000):
-    return wrap(text, width=max_length, break_long_words=False, replace_whitespace=False)
-
-
-def upload_pdf_to_pinecone(pdf_path):
-    pdf_text, pdf_title = extract_pdf_text(pdf_path)
+    raw_text = extract_text_from_docx(docx_path)
+    cleaned_text = clean_bangla_text(raw_text)
     
-    for page_num, text in enumerate(pdf_text):
-        if not text.strip():
-            print(f"Skipping Page {page_num + 1} as it contains no valid text.")
+    if not cleaned_text:
+        print("❌ No valid text found.")
+        return 0
+
+    # Create chunks based on character length
+    chunks = create_overlapping_chunks(cleaned_text, chunk_size=2500, overlap=500)
+
+    total_chunks_uploaded = 0
+
+    for chunk_index, chunk in enumerate(chunks):
+        if len(chunk) < 50:
+            # Skip super tiny chunks if any remain
             continue
 
-        # Split long text into multiple chunks
-        chunks = chunk_text(text, max_length=8000)
+        embedding = embed_with_gemini(chunk)
 
-        for chunk_index, chunk in enumerate(chunks):
-            embedding_vector = embed_text_with_gemini(chunk)
-            
-            if embedding_vector is not None:
-                # Unique ID per chunk (even if same page)
-                page_id = f"page-{page_num + 1}-chunk-{chunk_index + 1}"
-                
-                metadata = {
-                    "pdf_title": pdf_title,
-                    "page_number": page_num + 1,
-                    "chunk_number": chunk_index + 1,
-                    "text": chunk,
-                    "char_count": len(chunk)
-                }
-                
-                index.upsert([
-                    (page_id, embedding_vector, metadata)
-                ])
-                print(f"Page {page_num + 1} Chunk {chunk_index + 1} embedded and upserted.")
-            else:
-                print(f"Skipping Page {page_num + 1} Chunk {chunk_index + 1} due to empty content.")
+        if embedding:
+            vector_id = f"chunk_{chunk_index + 1}"
+            metadata = {
+                "source": os.path.basename(docx_path),
+                "chunk_index": chunk_index + 1,
+                "text": chunk,
+                "char_count": len(chunk),
+                "original_text": raw_text[:200] + "..." if len(raw_text) > 200 else raw_text
+            }
 
+            index.upsert([(vector_id, embedding, metadata)])
+            total_chunks_uploaded += 1
 
-# Uploading a PDF to Pinecone
-pdf_path = "C:\\Users\\hasan\\Downloads\\10ms Assesment\\HSC26-Bangla1st-Paper.pdf"  
-upload_pdf_to_pinecone(pdf_path)
+            print(f"✅ Uploaded: Chunk {chunk_index + 1} ({len(chunk)} chars)")
+        else:
+            print(f"❌ Failed to embed: Chunk {chunk_index + 1}")
 
-# Success message
-print("All pages from the PDF have been successfully embedded and upserted into Pinecone.")
+    print(f"\n🎉 Total chunks uploaded: {total_chunks_uploaded}")
+    return total_chunks_uploaded
+
+# Run this script
+if __name__ == "__main__":
+    docx_file_path = "C:\\Users\\hasan\\Assesment\\HSC 21 fixed.docx"  # Update as needed
+    upload_docx_to_pinecone(docx_file_path)
