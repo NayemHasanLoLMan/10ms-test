@@ -53,7 +53,7 @@ python flusk_api.py
 
 ## Sample Queries and Outputs
 
-### 🔤 Bangla Example
+### Bangla Example
 
 **Query:**
 ```
@@ -65,7 +65,7 @@ python flusk_api.py
 শম্ভুনাথকে অনুপমের ভাষায় সুপুরুষ বলা হয়েছে।
 ```
 
-### 🔠 English Example
+### English Example
 
 **Query:**
 ```
@@ -78,8 +78,15 @@ What is the age of onupom at the time of wedding?
 ```
 
 ---
+![Screenshot 1](Images/Screenshot 2025-07-26 202001.png)
+![Screenshot 2](Images/Screenshot 2025-07-26 202101.png)
+![Screenshot 3](Images/Screenshot 2025-07-26 202205.png)
+![Screenshot 4](Images/image copy 2.png)
+![Screenshot 5](Images/image copy.png)
+![Screenshot 6](Images/image.png)
+---
 
-## 📡 API Documentation
+## API Documentation
 
 ### POST `[/ask](http://localhost:5000/ask)`
 
@@ -99,6 +106,8 @@ What is the age of onupom at the time of wedding?
 ```
 
 ---
+
+
 
 ##  Evaluation Matrix (Basic Manual QA)
 
