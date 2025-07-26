@@ -154,7 +154,7 @@ def answer_question_with_context(query, context_groups):
     4. If contexts contain conflicting information, mention it
     5. Understand the context and what it implies and provide the best possible answer
     6. If the contexts don't contain enough information, say so clearly
-    7. Answer in the same language as the question
+    7. Answer in the same language as the QUESTION: {query}
     8. Be specific in your response
 
     ANSWER:"""
