@@ -5,6 +5,7 @@ import google.generativeai as genai
 from pinecone import Pinecone
 from dotenv import load_dotenv
 import logging
+import json
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,6 +29,25 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 # Initialize conversation history with a maximum length of 5
 conversation_history = []
 MAX_HISTORY_LENGTH = 5
+HISTORY_FILE = 'conversation_history.json'
+
+
+# Load conversation history from the JSON file at server start
+def load_conversation_history():
+    global conversation_history
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+            try:
+                conversation_history = json.load(f)
+            except json.JSONDecodeError:
+                print("Error loading conversation history from file, starting with an empty history.")
+
+# Save conversation history to the JSON file
+def save_conversation_history():
+    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+        json.dump(conversation_history, f, ensure_ascii=False, indent=4)
+
+
 
 def embed_query(query):
     """Create embedding for the search query"""
@@ -139,7 +159,7 @@ def answer_question_with_context(query, context_groups):
     prompt = f"""You are an expert assistant helping to answer questions based on understanding document content and what it implies. Only give the answer don't provide any sources or extra context. 
 
     
-    CONVERSATION HISTORY:
+    CONVERSATION HISTORY (use this to understand the previous context and what the user is asking):
     {conversation_prompt}
 
     CONTEXTS FROM DOCUMENT:
@@ -184,6 +204,10 @@ def get_answer(query):
     conversation_history.append({"question": query, "answer": answer})
     if len(conversation_history) > MAX_HISTORY_LENGTH:
         conversation_history.pop(0)
+
+
+    # Save updated conversation history to JSON
+    save_conversation_history()
 
     return answer, sources
 
