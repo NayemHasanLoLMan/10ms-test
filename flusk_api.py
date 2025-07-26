@@ -174,7 +174,7 @@ def answer_question_with_context(query, context_groups):
     4. If contexts contain conflicting information, mention it
     5. Understand the context and what it implies and provide the best possible answer
     6. If the contexts don't contain enough information, say so clearly
-    7. Answer in the same language as the QUESTION: {query}
+    7. Answer in the same language as the QUESTION: {query} (if needed translate the answer to {query} language)
     8. Be specific in your response
 
     ANSWER:"""
@@ -290,6 +290,8 @@ if __name__ == '__main__':
     if missing_vars:
         logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
         exit(1)
+
+    load_conversation_history()
     
     logger.info("Starting Bangla Q&A API server...")
     app.run(debug=True, host='0.0.0.0', port=5000)

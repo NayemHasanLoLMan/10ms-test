@@ -1,14 +1,22 @@
 [
     {
-        "question": "what was the last conversation we had?",
-        "answer": "আমি দুঃখিত, আপনার পূর্ববর্তী কথোপকথন সম্পর্কে তথ্য দিতে পারছি না।"
+        "question": "what was the occupation of শুম্ভুনাথ?",
+        "answer": "শুম্ভুনাথের পেশা ছিল ডাক্তারি।\n"
     },
     {
-        "question": "গল্পের প্রধান female চরিত্র কে",
-        "answer": "কল্যাণী গল্পের প্রধান ফিমেল চরিত্র।\n"
+        "question": "What is the main theme of the first passage?",
+        "answer": "নিম্নবিত্ত ব্যক্তির হঠাৎ বিত্তশালী হয়ে ওঠার ফলে সমাজে পরিচয় সংকট এই অংশে আলোচিত হয়েছে।\n"
     },
     {
-        "question": "what was the last conversation we had?",
-        "answer": "আমি দুঃখিত, আপনার পূর্ববর্তী কথোপকথন সম্পর্কে তথ্য দিতে পারছি না।\n"
+        "question": "তাঁকে অনুপমের ভাগ্যদেবতা বলা হয়েছে কেন?",
+        "answer": "মামাই অনুপমের আসল অভিভাবক এবং সংসারের সবকিছু নিজের হাতে নিয়েছিলেন বলে তাঁকে ভাগ্যদেবতা বলা হয়েছে।\n"
+    },
+    {
+        "question": "অনুপমের ভাষায় সুপুরুষ কাকে বলা হয়েছে?",
+        "answer": "শম্ভুনাথকে অনুপমের ভাষায় সুপুরুষ বলা হয়েছে।\n"
+    },
+    {
+        "question": "What is the age of onupom at the time of wedding?",
+        "answer": "বিয়ের সময় অনুপমের বয়স ২৭ বছর ছিল।\n"
     }
 ]
