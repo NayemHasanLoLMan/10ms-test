@@ -78,16 +78,11 @@ What is the age of onupom at the time of wedding?
 ```
 
 ---
-![Screenshot 1](Images/Screenshot 2025-07-26 202001.png)
-
-![Screenshot 2](Images/Screenshot 2025-07-26 202101.png)
-
-![Screenshot 3](Images/Screenshot 2025-07-26 202205.png)
-
-![Screenshot 4](Images/image copy 2.png)
-
-![Screenshot 5](Images/image copy.png)
-
+![Screenshot 1](Images/Screenshot%202025-07-26%20202001.png)
+![Screenshot 2](Images/Screenshot%202025-07-26%20202101.png)
+![Screenshot 3](Images/Screenshot%202025-07-26%20202205.png)
+![Screenshot 4](Images/image%20copy%202.png)
+![Screenshot 5](Images/image%20copy.png)
 ![Screenshot 6](Images/image.png)
 ---
 
